@@ -35,9 +35,12 @@
     </div>
   </div>
 
+  <!-- Supabase SDK -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
   <script>
     // Supabase configuration
-    const SUPABASE_URL = 'https://'https://ytaguefncddqtkvlmvah.supabase.co'; // Replace with your Supabase URL
+    const SUPABASE_URL = 'https://ytaguefncddqtkvlmvah.supabase.co'; // Replace with your Supabase URL
     const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl0YWd1ZWZuY2RkcXRrdmxtdmFoIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc0MTAyNTI3OCwiZXhwIjoyMDU2NjAxMjc4fQ.KqzlmUa3EgJdqH1uFCtqoCEdBcYWSTKa0o9EPX34cZ8'; // Replace with your Supabase service role key
     const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
@@ -185,6 +188,5 @@
     renderItems();
     renderOrders();
   </script>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </body>
 </html>
