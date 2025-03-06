@@ -3,190 +3,59 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Admin App - Manage Items</title>
-  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <title>Manage Items</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
-<body class="bg-gray-100">
-  <div class="container mx-auto p-4">
-    <h1 class="text-3xl font-bold text-center mb-8">Admin Panel</h1>
-
-    <!-- Manage Items Section -->
-    <div id="manage-items" class="bg-white p-6 rounded-lg shadow-md mb-8">
-      <h2 class="text-2xl font-bold mb-4">Manage Items</h2>
-      <form id="item-form" class="space-y-4">
-        <input type="text" id="item-name" placeholder="Item Name" class="w-full p-2 border rounded">
-        <input type="number" id="item-price" placeholder="Price (MVR)" class="w-full p-2 border rounded">
-        <input type="text" id="item-unit" placeholder="Unit (KG, Gram, Pcs, Tray)" class="w-full p-2 border rounded">
-        <button type="submit" class="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600">Add/Update Item</button>
-      </form>
-    </div>
-
-    <!-- Item List -->
-    <div id="item-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
-      <!-- Items will be dynamically added here -->
-    </div>
-
-    <!-- Orders Section -->
-    <div id="orders-section" class="bg-white p-6 rounded-lg shadow-md">
-      <h2 class="text-2xl font-bold mb-4">Orders</h2>
-      <div id="orders-list">
-        <!-- Orders will be dynamically added here -->
+<body>
+  <div class="container">
+    <h1 class="text-center my-4">Manage Items</h1>
+    <form id="item-form">
+      <div class="mb-3">
+        <label for="item-name" class="form-label">Item Name</label>
+        <input type="text" class="form-control" id="item-name" required>
       </div>
-    </div>
+      <div class="mb-3">
+        <label for="item-price" class="form-label">Price</label>
+        <input type="number" class="form-control" id="item-price" required>
+      </div>
+      <div class="mb-3">
+        <label for="item-unit" class="form-label">Unit</label>
+        <select class="form-select" id="item-unit" required>
+          <option value="kg">kg</option>
+          <option value="gram">gram</option>
+          <option value="pieces">pieces</option>
+          <option value="trays">trays</option>
+        </select>
+      </div>
+      <button type="submit" class="btn btn-primary">Save Item</button>
+    </form>
   </div>
-
-  <!-- Supabase SDK -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
   <script>
-    // Supabase configuration
-    const SUPABASE_URL = 'https://ytaguefncddqtkvlmvah.supabase.co'; // Replace with your Supabase URL
-    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl0YWd1ZWZuY2RkcXRrdmxtdmFoIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc0MTAyNTI3OCwiZXhwIjoyMDU2NjAxMjc4fQ.KqzlmUa3EgJdqH1uFCtqoCEdBcYWSTKa0o9EPX34cZ8'; // Replace with your Supabase service role key
-    const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    const binId = '67ca3266e41b4d34e4a21490';
+    const apiKey = '$2a$10$ISnzYBxkpDNeersZBo0mVe5v/iOr89sUQyl.zGdj3v.pGlKBJLYgu';
 
-    // DOM elements
-    const itemList = document.getElementById('item-list');
-    const ordersList = document.getElementById('orders-list');
-    const itemForm = document.getElementById('item-form');
-    const itemName = document.getElementById('item-name');
-    const itemPrice = document.getElementById('item-price');
-    const itemUnit = document.getElementById('item-unit');
-
-    // Track selected item for editing
-    let selectedItemId = null;
-
-    // Fetch items from Supabase
-    async function fetchItems() {
-      try {
-        const { data, error } = await supabase
-          .from('items')
-          .select('*');
-        if (error) throw error;
-        return data || [];
-      } catch (error) {
-        console.error('Error fetching items:', error);
-        return [];
-      }
-    }
-
-    // Render items
-    async function renderItems() {
-      const items = await fetchItems();
-      itemList.innerHTML = '';
-      items.forEach((item) => {
-        const itemCard = document.createElement('div');
-        itemCard.className = 'bg-white p-4 rounded-lg shadow-md';
-        itemCard.innerHTML = `
-          <h3 class="text-xl font-bold">${item.name}</h3>
-          <p class="text-gray-600">${item.price} MVR</p>
-          <p class="text-sm text-gray-500">Per ${item.unit}</p>
-          <div class="mt-2 space-x-2">
-            <button onclick="editItem('${item.id}')" class="text-blue-500 hover:text-blue-700">Edit</button>
-            <button onclick="deleteItem('${item.id}')" class="text-red-500 hover:text-red-700">Delete</button>
-          </div>
-        `;
-        itemList.appendChild(itemCard);
-      });
-    }
-
-    // Add or update item
-    itemForm.addEventListener('submit', async (e) => {
+    document.getElementById('item-form').addEventListener('submit', async (e) => {
       e.preventDefault();
-      const itemData = {
-        name: itemName.value,
-        price: parseFloat(itemPrice.value),
-        unit: itemUnit.value,
+      const item = {
+        id: Date.now(),
+        name: document.getElementById('item-name').value,
+        price: document.getElementById('item-price').value,
+        unit: document.getElementById('item-unit').value,
+        lastUpdated: new Date().toISOString()
       };
 
-      try {
-        if (selectedItemId) {
-          // Update existing item
-          const { error } = await supabase
-            .from('items')
-            .update(itemData)
-            .eq('id', selectedItemId);
-          if (error) throw error;
-        } else {
-          // Add new item
-          const { error } = await supabase
-            .from('items')
-            .insert([itemData]);
-          if (error) throw error;
-        }
-        itemForm.reset();
-        selectedItemId = null;
-        renderItems();
-      } catch (error) {
-        console.error('Error saving item:', error);
+      const response = await fetch(`https://api.jsonbin.io/v3/b/${binId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json', 'X-Master-Key': apiKey },
+        body: JSON.stringify({ items: [item] })
+      });
+
+      if (response.ok) {
+        alert('Item saved successfully!');
+      } else {
+        alert('Failed to save item.');
       }
     });
-
-    // Edit item
-    async function editItem(itemId) {
-      const { data, error } = await supabase
-        .from('items')
-        .select('*')
-        .eq('id', itemId)
-        .single();
-      if (error) {
-        console.error('Error fetching item:', error);
-        return;
-      }
-      itemName.value = data.name;
-      itemPrice.value = data.price;
-      itemUnit.value = data.unit;
-      selectedItemId = itemId;
-    }
-
-    // Delete item
-    async function deleteItem(itemId) {
-      try {
-        const { error } = await supabase
-          .from('items')
-          .delete()
-          .eq('id', itemId);
-        if (error) throw error;
-        renderItems();
-      } catch (error) {
-        console.error('Error deleting item:', error);
-      }
-    }
-
-    // Fetch orders from Supabase
-    async function fetchOrders() {
-      try {
-        const { data, error } = await supabase
-          .from('orders')
-          .select('*');
-        if (error) throw error;
-        return data || [];
-      } catch (error) {
-        console.error('Error fetching orders:', error);
-        return [];
-      }
-    }
-
-    // Render orders
-    async function renderOrders() {
-      const orders = await fetchOrders();
-      ordersList.innerHTML = '';
-      orders.forEach((order) => {
-        const orderCard = document.createElement('div');
-        orderCard.className = 'bg-white p-4 rounded-lg shadow-md mb-4';
-        orderCard.innerHTML = `
-          <h3 class="text-xl font-bold">Order for ${order.customer_name}</h3>
-          <p class="text-gray-600">${order.item_name} x ${order.quantity}</p>
-          <p class="text-gray-600">Total: ${order.total_price} MVR</p>
-          <p class="text-sm text-gray-500">Address: ${order.customer_address}</p>
-          <p class="text-sm text-gray-500">Mobile: ${order.customer_mobile}</p>
-        `;
-        ordersList.appendChild(orderCard);
-      });
-    }
-
-    // Initial render
-    renderItems();
-    renderOrders();
   </script>
 </body>
 </html>
