@@ -10,6 +10,7 @@
   <div class="container">
     <h1 class="text-center my-4">Manage Items</h1>
     <form id="item-form">
+      <input type="hidden" id="item-id">
       <div class="mb-3">
         <label for="item-name" class="form-label">Item Name</label>
         <input type="text" class="form-control" id="item-name" required>
@@ -55,7 +56,7 @@
         headers: { 'X-Master-Key': apiKey }
       });
       const data = await response.json();
-      displayItems(data.record.items);
+      displayItems(data.record.items || []);
     }
 
     // Display items in the table
@@ -87,23 +88,42 @@
     // Add or update an item
     document.getElementById('item-form').addEventListener('submit', async (e) => {
       e.preventDefault();
+      const itemId = document.getElementById('item-id').value;
       const item = {
-        id: Date.now(),
+        id: itemId || Date.now(), // Use existing ID or generate a new one
         name: document.getElementById('item-name').value,
         price: document.getElementById('item-price').value,
         unit: document.getElementById('item-unit').value,
         lastUpdated: new Date().toISOString()
       };
 
-      const response = await fetch(`https://api.jsonbin.io/v3/b/${binId}`, {
+      // Fetch existing items
+      const response = await fetch(`https://api.jsonbin.io/v3/b/${binId}/latest`, {
+        headers: { 'X-Master-Key': apiKey }
+      });
+      const data = await response.json();
+      const items = data.record.items || [];
+
+      // Update or add the item
+      const itemIndex = items.findIndex(i => i.id == itemId);
+      if (itemIndex !== -1) {
+        items[itemIndex] = item; // Update existing item
+      } else {
+        items.push(item); // Add new item
+      }
+
+      // Save the updated list
+      const updateResponse = await fetch(`https://api.jsonbin.io/v3/b/${binId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json', 'X-Master-Key': apiKey },
-        body: JSON.stringify({ items: [item] })
+        body: JSON.stringify({ items })
       });
 
-      if (response.ok) {
+      if (updateResponse.ok) {
         alert('Item saved successfully!');
         fetchItems(); // Refresh the list
+        document.getElementById('item-form').reset(); // Clear the form
+        document.getElementById('item-id').value = ''; // Reset the hidden ID field
       } else {
         alert('Failed to save item.');
       }
@@ -118,6 +138,7 @@
       const item = data.record.items.find(i => i.id == itemId);
 
       if (item) {
+        document.getElementById('item-id').value = item.id;
         document.getElementById('item-name').value = item.name;
         document.getElementById('item-price').value = item.price;
         document.getElementById('item-unit').value = item.unit;
@@ -130,12 +151,12 @@
         headers: { 'X-Master-Key': apiKey }
       });
       const data = await response.json();
-      const updatedItems = data.record.items.filter(i => i.id != itemId);
+      const items = data.record.items.filter(i => i.id != itemId);
 
       const updateResponse = await fetch(`https://api.jsonbin.io/v3/b/${binId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json', 'X-Master-Key': apiKey },
-        body: JSON.stringify({ items: updatedItems })
+        body: JSON.stringify({ items })
       });
 
       if (updateResponse.ok) {
