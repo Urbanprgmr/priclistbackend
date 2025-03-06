@@ -29,11 +29,62 @@
       </div>
       <button type="submit" class="btn btn-primary">Save Item</button>
     </form>
+
+    <h2 class="my-4">Item List</h2>
+    <table class="table table-bordered">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Price</th>
+          <th>Unit</th>
+          <th>Last Updated</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="items-table-body"></tbody>
+    </table>
   </div>
+
   <script>
     const binId = '67ca3266e41b4d34e4a21490';
     const apiKey = '$2a$10$ISnzYBxkpDNeersZBo0mVe5v/iOr89sUQyl.zGdj3v.pGlKBJLYgu';
 
+    // Fetch and display items
+    async function fetchItems() {
+      const response = await fetch(`https://api.jsonbin.io/v3/b/${binId}/latest`, {
+        headers: { 'X-Master-Key': apiKey }
+      });
+      const data = await response.json();
+      displayItems(data.record.items);
+    }
+
+    // Display items in the table
+    function displayItems(items) {
+      const tableBody = document.getElementById('items-table-body');
+      tableBody.innerHTML = items.map(item => `
+        <tr data-id="${item.id}">
+          <td>${item.name}</td>
+          <td>${item.price}</td>
+          <td>${item.unit}</td>
+          <td>${new Date(item.lastUpdated).toLocaleString()}</td>
+          <td>
+            <button class="btn btn-sm btn-warning edit-item">Edit</button>
+            <button class="btn btn-sm btn-danger delete-item">Delete</button>
+          </td>
+        </tr>
+      `).join('');
+
+      // Add event listeners for edit and delete buttons
+      document.querySelectorAll('.edit-item').forEach(button => {
+        button.addEventListener('click', () => editItem(button.closest('tr').dataset.id));
+      });
+
+      document.querySelectorAll('.delete-item').forEach(button => {
+        button.addEventListener('click', () => deleteItem(button.closest('tr').dataset.id));
+      });
+    }
+
+    // Add or update an item
     document.getElementById('item-form').addEventListener('submit', async (e) => {
       e.preventDefault();
       const item = {
@@ -52,10 +103,51 @@
 
       if (response.ok) {
         alert('Item saved successfully!');
+        fetchItems(); // Refresh the list
       } else {
         alert('Failed to save item.');
       }
     });
+
+    // Edit an item
+    async function editItem(itemId) {
+      const response = await fetch(`https://api.jsonbin.io/v3/b/${binId}/latest`, {
+        headers: { 'X-Master-Key': apiKey }
+      });
+      const data = await response.json();
+      const item = data.record.items.find(i => i.id == itemId);
+
+      if (item) {
+        document.getElementById('item-name').value = item.name;
+        document.getElementById('item-price').value = item.price;
+        document.getElementById('item-unit').value = item.unit;
+      }
+    }
+
+    // Delete an item
+    async function deleteItem(itemId) {
+      const response = await fetch(`https://api.jsonbin.io/v3/b/${binId}/latest`, {
+        headers: { 'X-Master-Key': apiKey }
+      });
+      const data = await response.json();
+      const updatedItems = data.record.items.filter(i => i.id != itemId);
+
+      const updateResponse = await fetch(`https://api.jsonbin.io/v3/b/${binId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json', 'X-Master-Key': apiKey },
+        body: JSON.stringify({ items: updatedItems })
+      });
+
+      if (updateResponse.ok) {
+        alert('Item deleted successfully!');
+        fetchItems(); // Refresh the list
+      } else {
+        alert('Failed to delete item.');
+      }
+    }
+
+    // Initial fetch
+    fetchItems();
   </script>
 </body>
 </html>
