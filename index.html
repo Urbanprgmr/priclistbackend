@@ -28,6 +28,10 @@
           <option value="trays">trays</option>
         </select>
       </div>
+      <div class="mb-3">
+        <label for="item-image" class="form-label">Image URL</label>
+        <input type="url" class="form-control" id="item-image" required>
+      </div>
       <button type="submit" class="btn btn-primary">Save Item</button>
     </form>
 
@@ -38,6 +42,7 @@
           <th>Name</th>
           <th>Price</th>
           <th>Unit</th>
+          <th>Image</th>
           <th>Last Updated</th>
           <th>Actions</th>
         </tr>
@@ -67,6 +72,7 @@
           <td>${item.name}</td>
           <td>${item.price}</td>
           <td>${item.unit}</td>
+          <td><img src="${item.image}" alt="${item.name}" style="width: 50px; height: 50px; object-fit: cover;"></td>
           <td>${new Date(item.lastUpdated).toLocaleString()}</td>
           <td>
             <button class="btn btn-sm btn-warning edit-item">Edit</button>
@@ -94,6 +100,7 @@
         name: document.getElementById('item-name').value,
         price: document.getElementById('item-price').value,
         unit: document.getElementById('item-unit').value,
+        image: document.getElementById('item-image').value,
         lastUpdated: new Date().toISOString()
       };
 
@@ -142,6 +149,7 @@
         document.getElementById('item-name').value = item.name;
         document.getElementById('item-price').value = item.price;
         document.getElementById('item-unit').value = item.unit;
+        document.getElementById('item-image').value = item.image;
       }
     }
 
